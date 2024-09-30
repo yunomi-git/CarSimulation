@@ -31,6 +31,10 @@ class SimulationSolver:
         self.state_names = list(init_state.keys())
         self.num_states = len(self.state_names)
 
+        self.combined_histories = None
+        self.timesteps = None
+        self.individual_histories = None
+
     @abstractmethod
     def get_inputs_at_t(self, t):
         pass
@@ -94,6 +98,16 @@ class SimulationSolver:
 
         # Now combine
         histories.update(observation_histories.dict)
+
+        self.combined_histories = []
+        self.timesteps = timesteps
+        self.individual_histories = histories
+        for i in range(len(timesteps)):
+            step_state = {}
+            for key in histories.keys():
+                step_state[key] = histories[key][i]
+            self.combined_histories.append(step_state)
+
         return histories, timesteps
 
     def plot_histories(self, histories, timesteps):
