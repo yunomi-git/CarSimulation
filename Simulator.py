@@ -26,7 +26,7 @@ class DictHistory:
 
 
 class SimulationSolver:
-    def __init__(self, init_state):
+    def __init__(self, init_state, dt):
         self.init_state = init_state
         self.state_names = list(init_state.keys())
         self.num_states = len(self.state_names)
@@ -34,6 +34,7 @@ class SimulationSolver:
         self.combined_histories = None
         self.timesteps = None
         self.individual_histories = None
+        self.dt = dt
 
     @abstractmethod
     def get_inputs_at_t(self, t):
@@ -44,7 +45,7 @@ class SimulationSolver:
         pass
 
     @abstractmethod
-    def get_observations_at_t(self, t, state):
+    def get_observations_at_t(self, t, state, prev_state):
         pass
 
     def _generate_dx(self):
@@ -77,23 +78,27 @@ class SimulationSolver:
             state[name] = x[i]
         return state
 
-    def solve_state(self, dt, final_time):
-        num_steps = int(final_time / dt)
-        timesteps = np.linspace(0, num_steps * dt, num_steps)
+    def solve_state(self, final_time):
+        num_steps = int(final_time / self.dt)
+        timesteps = np.linspace(0, num_steps * self.dt, num_steps)
         sol = solve_ivp(self._generate_dx(), [0, final_time], self._state_to_tuple(self.init_state), t_eval=timesteps)
         histories = self._tuple_to_state(sol.y)
         timesteps = sol.t
         return histories, timesteps
 
-    def solve(self, dt, final_time):
-        histories, timesteps = self.solve_state(dt, final_time)
+    def solve(self, final_time):
+        histories, timesteps = self.solve_state(final_time)
         state_histories = DictHistory(histories)
         observation_histories = DictHistory()
 
         for i in range(len(timesteps)):
             state = state_histories.get_index(i)
             time = timesteps[i]
-            observation = self.get_observations_at_t(time, state)
+            if i == 0:
+                prev_state = self.init_state
+            else:
+                prev_state = state_histories.get_index(i-1)
+            observation = self.get_observations_at_t(time, state, prev_state)
             observation_histories.add_dict(observation)
 
         # Now combine

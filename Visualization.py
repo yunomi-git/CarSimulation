@@ -1,16 +1,26 @@
-import matplotlib.pyplot as plt
 import numpy as np
-import scipy.spatial.transform as transform
 from matplotlib.patches import Polygon, Circle
+
+from util import get_rotation_matrix_2d
+from abc import ABC, abstractmethod
 
 def get_box(width, height):
     return PolygonWrapper(np.array([[0, 0], [0, height], [width, height], [width, 0]]))
 
-def get_rotation_matrix_2d(theta):
-    return np.array([[np.cos(theta), -np.sin(theta)],
-                     [np.sin(theta), np.cos(theta)]])
+class DrawWrapper(ABC):
+    @abstractmethod
+    def translate(self, translation):
+        pass
 
-class CircleWrapper:
+    @abstractmethod
+    def rotate(self, theta):
+        pass
+
+    @abstractmethod
+    def draw(self, ax, **kargs):
+        pass
+
+class CircleWrapper(DrawWrapper):
     def __init__(self, center, radius):
         self.center = center
         self.radius = radius
@@ -26,7 +36,7 @@ class CircleWrapper:
         # poly_list = [tuple(point) for point in self.points]
         return ax.add_patch(Circle(self.center, **kargs))
 
-class PolygonWrapper:
+class PolygonWrapper(DrawWrapper):
     def __init__(self, points=None):
         self.points = points
 
@@ -42,7 +52,7 @@ class PolygonWrapper:
         # poly_list = [tuple(point) for point in self.points]
         return ax.add_patch(Polygon(self.points, **kargs))
 
-class LineWrapper:
+class LineWrapper(DrawWrapper):
     def __init__(self, start, stop, width=0.02):
         self.start = start
         self.stop = stop
