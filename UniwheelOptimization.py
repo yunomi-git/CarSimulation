@@ -18,17 +18,18 @@ parameters = {
     "velocity": 0.1,  # m/s
 
     # Car kinematics
-    "desired_body_height": 0.02,
-    "body_width" : 0.1,
+    "desired_body_height": 0.010,
+    # "full_body_width": 0.08255, # 3.25" half-width
+    "body_width": 0.020,
     "body_height" : 0.01,
-    "arm_length" : 0.10,
-    "arm_default_angle": 0, #aka angle of 0 spring deflection
+    "arm_length" : 0.100,
+    "arm_default_angle": -0.162, #aka angle of 0 spring deflection
 
     # Wishbone stats
     "k" : 500,
     "arm_x" : 0.06, #0.05
-    "arm_y" : 0.005,
-    "spring_angle" : 0.4
+    "arm_y" : -0.015,
+    "spring_angle" : 0.6
 }
 
 
@@ -78,9 +79,12 @@ if __name__=="__main__":
 
     # plot_responses("k", 440, 880, 10, parameters)
     # plot_responses("b", 0.01, 0.5, 10, parameters)
-    # plot_responses("arm_length", 0.04, 0.1, 10, parameters)
+    # plot_responses("body_width", 0.02, 0.05, 10, parameters)
+    # plot_responses("arm_length", 0.020, 0.100, 10, parameters)
+
     # plot_responses("arm_x", 0.04, 0.08, 10, parameters)
-    # plot_responses("arm_y", -0.02, 0.02, 10, parameters)
-    plot_responses("spring_angle", 0, np.pi/3, 10, parameters)
+    # plot_responses("spring_angle", 0, np.pi/3, 10, parameters)
+
+    plot_responses("arm_y", -0.05, 0.05, 10, parameters)
 
 

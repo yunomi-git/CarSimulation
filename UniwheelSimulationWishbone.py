@@ -20,21 +20,22 @@ parameters = {
     # Car dynamics
     "m": 1.5/4,  # kg
     "g" : 10,  # N / kg
-    "b" : 0.3,  # N/ m/s
+    "b" : 0.1,  # N/ m/s
     "velocity": 0.1,  # m/s
 
     # Car kinematics
-    "desired_body_height": 0.02,
-    "body_width" : 0.1,
+    "desired_body_height": 0.010,
+    # "full_body_width": 0.08255, # 3.25" half-width
+    "body_width": 0.020,
     "body_height" : 0.01,
-    "arm_length" : 0.10,
-    "arm_default_angle": -0.4155, #aka angle of 0 spring deflection
+    "arm_length" : 0.100,
+    "arm_default_angle": -0.194, #aka angle of 0 spring deflection
 
     # Wishbone stats
     "k" : 500,
     "arm_x" : 0.06, #0.05
-    "arm_y" : 0.005,
-    "spring_angle" : 0.4
+    "arm_y" : -0.015,
+    "spring_angle" : 0.6
 }
 
 hump_generator = HumpGenerator.generate_profile(height=input_parameters["hump_height"],
@@ -47,7 +48,10 @@ class UniwheelSimulation(SimulationSolver):
         self.b = parameters["b"]
 
         # Car kinematics
-        self.body_width = parameters["body_width"]
+        if "full_body_width" in parameters:
+            self.body_width = parameters["full_body_width"] - parameters["arm_length"]
+        else:
+            self.body_width = parameters["body_width"]
         self.body_height = parameters["body_height"]
         self.arm_length = parameters["arm_length"]
         self.arm_default_angle = parameters["arm_default_angle"]
@@ -104,10 +108,12 @@ class UniwheelSimulation(SimulationSolver):
         height_difference = inputs["height"] - state["body_height"]
         arm_pitch = np.asin(height_difference / self.arm_length)
         body_force = self.m * (state["body_velocity"] - prev_state["body_velocity"]) / self.dt
+        out = self.wishbone.get_torque(arm_pitch - self.arm_default_angle)
         observations = {
             "arm_pitch": arm_pitch,
             "wheel_height": inputs["height"],
-            "body_force": body_force
+            "body_force": body_force,
+            "shock_length": out["shock_length"]
         }
         return observations
 
@@ -241,7 +247,8 @@ if __name__=="__main__":
     init_state.update({
         "arm_pitch": 0.0,
         "wheel_height": 0.0,
-        "body_force": 0.0
+        "body_force": 0.0,
+        "shock_length": 0.0
     })
     combined_histories = solver.combined_histories
     fig, ax = plt.subplots()

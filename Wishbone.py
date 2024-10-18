@@ -61,7 +61,8 @@ class Wishbone(DrawWrapper):
             "moment": moment,
             "force_mag": force_mag,
             "force": force,
-            "arm_position": arm_position
+            "arm_position": arm_position,
+            "shock_length": spring_length
         }
 
     def get_arm_position(self, angle):
@@ -108,11 +109,10 @@ class Wishbone(DrawWrapper):
         return line.draw(ax, **kargs), line2.draw(ax, **kargs)
 
 if __name__=="__main__":
-
-    k = 660
-    arm_x = 0.07
-    arm_y = -0.0
-    spring_angle = np.pi / 6
+    k = 500
+    arm_x = 0.06
+    arm_y = 0.005
+    spring_angle = 0.4
     wishbone = Wishbone(k=k, arm_x=arm_x, arm_y=arm_y, spring_angle=spring_angle)
     print(wishbone.mount_position)
 
@@ -128,6 +128,8 @@ if __name__=="__main__":
     angles *= 180.0/np.pi
     ax = axs[0]
     ax.plot(angles, moments)
+    ax.set_xlabel("angle")
+    ax.set_ylabel("Moment")
     ax = axs[1]
     ax.plot(angles, forces)
     plt.show()

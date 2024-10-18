@@ -13,7 +13,7 @@ def binary_search(minx, maxx, function, max_depth=8, depth=0):
     if depth == max_depth:
         return x
     out = function(x)
-    print(out)
+    # print(out)
     if out > 0:
         return binary_search(minx=minx, maxx=(maxx + x) / 2.0, function=function, max_depth=max_depth, depth=depth + 1)
     else:
